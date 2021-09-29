@@ -1,56 +1,48 @@
 from inventory_report.reports.simple_report import SimpleReport
 from inventory_report.reports.complete_report import CompleteReport
-from csv import reader
+import csv
 import json
 import xml.etree.ElementTree as ET
 
 
 class Inventory:
     @classmethod
-    def create_dict_from_file_matrix(self, file_matrix):
-        file_dict = []
-
-        for line in range(1, len(file_matrix)):
-            obj = {}
-            for col in range(0, len(file_matrix[0])):
-                obj[file_matrix[0][col]] = file_matrix[line][col]
-
-            file_dict.append(obj)
+    def open_and_convert_to_dict_csv_file(self, path):
+        with open(path) as csv_file:
+            file_dict = list(csv.DictReader(csv_file))
 
         return file_dict
+
+    @classmethod
+    def open_and_convert_to_dict_json_file(self, path):
+        with open(path) as json_file:
+            file_dict = json.load(json_file)
+
+        return file_dict
+
+    @classmethod
+    def open_and_convert_to_dict_xml_file(self, path):
+        root = ET.parse(path).getroot()
+        registers = root.findall("record")
+        file = []
+        for each_register in registers:
+            file_dict = {}
+            for tag in each_register:
+                file_dict[tag.tag] = tag.text
+            file.append(file_dict)
+
+        return file
 
     @classmethod
     def import_data(self, path, report_type):
         file_dict = []
 
         if path.endswith('.csv'):
-            list_file_matrix = []
-
-            with open(path, 'r') as csv_file:
-                csv_reader = reader(csv_file)
-                list_of_rows = list(csv_reader)
-                list_file_matrix.append(list_of_rows)
-
-            file_dict = self.create_dict_from_file_matrix(list_file_matrix[0])
-
+            file_dict = self.open_and_convert_to_dict_csv_file(path)
         elif path.endswith('.json'):
-            with open(path) as json_file:
-                file = json.load(json_file)
-
-            file_dict = file
-
+            file_dict = self.open_and_convert_to_dict_json_file(path)
         elif path.endswith('.xml'):
-            root = ET.parse(path).getroot()
-            registers = root.findall("record")
-            file = []
-            for each_register in registers:
-                file_dict = {}
-                for tag in each_register:
-                    file_dict[tag.tag] = tag.text
-                file.append(file_dict)
-
-            file_dict = file
-
+            file_dict = self.open_and_convert_to_dict_xml_file(path)
         else:
             return 'Formato de arquivo não tratado'
 
