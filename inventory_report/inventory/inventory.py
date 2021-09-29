@@ -2,6 +2,7 @@ from inventory_report.reports.simple_report import SimpleReport
 from inventory_report.reports.complete_report import CompleteReport
 from csv import reader
 import json
+import xml.etree.ElementTree as ET
 
 
 class Inventory:
@@ -39,7 +40,17 @@ class Inventory:
             file_dict = file
 
         elif path.endswith('.xml'):
-            pass
+            root = ET.parse(path).getroot()
+            registers = root.findall("record")
+            file = []
+            for each_register in registers:
+                file_dict = {}
+                for tag in each_register:
+                    file_dict[tag.tag] = tag.text
+                file.append(file_dict)
+
+            file_dict = file
+
         else:
             return 'Formato de arquivo não tratado'
 
