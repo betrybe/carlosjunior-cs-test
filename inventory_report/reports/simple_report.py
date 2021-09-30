@@ -45,27 +45,16 @@ class SimpleReport:
             return list_dict[0]['data_de_validade']
         '''
             caso chegue aqui, então temos mais de um produto para
-            averiguar qual tem a data de validade mais próxima, mas
-            antes faremos uma nova lista sem os produtos vencidos
+            averiguar qual tem a data de validade mais próxima e
+            que não esteja vencido
         '''
-        new_list = []
-
-        for each_obj in list_dict:
-            formatted_date = datetime(
-                int(each_obj['data_de_validade'].split('-')[0]),
-                int(each_obj['data_de_validade'].split('-')[1]),
-                int(each_obj['data_de_validade'].split('-')[2])
-            )
-
-            if formatted_date >= datetime.now():
-                new_list.append(each_obj)
-
-        '''
-            averíguo se há produtos na nova lista, pois se não
-            houver todos estão vencidos
-        '''
-        if len(new_list) < 1:
-            return 'Todos produtos vencidos'
+        new_list = [
+            each_obj for each_obj in list_dict
+            if datetime.strptime(
+                each_obj["data_de_validade"],
+                "%Y-%m-%d"
+            ) >= datetime.now()
+        ]
 
         obj = new_list[0]
 
@@ -91,21 +80,15 @@ class SimpleReport:
             return list_dict[0]['nome_da_empresa']
 
         '''
-            passaremos o nome da empresa de cada produto
-            para uma lista. assim, podemos contar a frequência
-            de cada uma posteriormente
+            passaremos o nome da empresa de cada produto para
+            uma lista. assim, podemos abstrair a que aparece
+            mais veses
         '''
-        companies_list = []
-        for each_obj in list_dict:
-            companies_list.append(each_obj['nome_da_empresa'])
+        companies_list = [
+            each_company["nome_da_empresa"] for each_company in list_dict
+        ]
 
-        max = 0
-        company = companies_list[0]
-        for each_company in companies_list:
-            freq = companies_list.count(each_company)
-            if freq > max:
-                max = freq
-                company = each_company
+        company = max(companies_list)
 
         return company
 

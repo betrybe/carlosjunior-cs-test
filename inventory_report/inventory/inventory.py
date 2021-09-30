@@ -24,31 +24,26 @@ class Inventory:
     def open_and_convert_to_dict_xml_file(self, path):
         root = ET.parse(path).getroot()
         registers = root.findall("record")
-        file = []
+        file_dict = []
         for each_register in registers:
-            file_dict = {}
+            obj = {}
             for tag in each_register:
-                file_dict[tag.tag] = tag.text
-            file.append(file_dict)
+                obj[tag.tag] = tag.text
+            file_dict.append(obj)
 
-        return file
+        return file_dict
 
     @classmethod
     def import_data(self, path, report_type):
-        file_dict = []
-
         if path.endswith('.csv'):
             file_dict = self.open_and_convert_to_dict_csv_file(path)
-        elif path.endswith('.json'):
+        if path.endswith('.json'):
             file_dict = self.open_and_convert_to_dict_json_file(path)
-        elif path.endswith('.xml'):
+        if path.endswith('.xml'):
             file_dict = self.open_and_convert_to_dict_xml_file(path)
-        else:
-            return 'Formato de arquivo não tratado'
-
         if report_type == 'simples':
-            return SimpleReport.generate(file_dict)
-        elif report_type == 'completo':
-            return CompleteReport.generate(file_dict)
+            report = SimpleReport.generate(file_dict)
         else:
-            return 'Erro no parâmetro report_type'
+            report = CompleteReport.generate(file_dict)
+
+        return report

@@ -1,4 +1,5 @@
 from inventory_report.reports.simple_report import SimpleReport
+from collections import Counter
 
 
 class CompleteReport(SimpleReport):
@@ -17,23 +18,14 @@ class CompleteReport(SimpleReport):
             todas as empresas, sem repetições, para contarmos quantas vezes
             elas se repetem na lista de produtos
         '''
-        companies_list = []
-        for each_obj in list_dict:
-            companies_list.append(each_obj['nome_da_empresa'])
+        companies_list = [
+            each_company["nome_da_empresa"] for each_company in list_dict
+        ]
+        companies_freq = Counter(companies_list)
 
-        companies_list_unique = []
-        quantity_product = []
-
-        for each_company in companies_list:
-            if each_company not in companies_list_unique:
-                companies_list_unique.append(each_company)
-
-        for each_company in companies_list_unique:
-            freq = companies_list.count(each_company)
-            quantity_product.append(str(freq))
-
-        for i in range(len(companies_list_unique)):
-            out += "- "+companies_list_unique[i]+": "+quantity_product[i]+"\n"
+        out = "Produtos estocados por empresa: \n"
+        for company in companies_freq:
+            out += "- "+str(company)+": "+str(companies_freq[company])+"\n"
 
         return out
 
@@ -46,7 +38,5 @@ class CompleteReport(SimpleReport):
             super().generate(list_dict) + "\n" +
             self.quantity_product_per_employ(list_dict)
         )
-
-        # print(out)
 
         return out
